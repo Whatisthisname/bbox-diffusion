@@ -14,6 +14,7 @@ def make_image(shape: tuple[int, int], n_squares: int) -> tuple[np.ndarray, list
     empty_image_pil = Image.fromarray((empty_image.numpy() * 255).astype(np.uint8))
 
     bboxes = []
+    colors = []
     for _ in range(n_squares):
         x = np.random.randint(0, shape[0])
         y = np.random.randint(0, shape[1])
@@ -44,6 +45,7 @@ def make_image(shape: tuple[int, int], n_squares: int) -> tuple[np.ndarray, list
             )
         )
 
+        colors.append(color)
         # Pad square to same size as image, but keep paste_x and paste_y
         padded_square = Image.new("RGBA", empty_image_pil.size)
         padded_square.paste(square, (paste_x, paste_y))
@@ -53,7 +55,7 @@ def make_image(shape: tuple[int, int], n_squares: int) -> tuple[np.ndarray, list
             empty_image_pil.convert("RGBA"), padded_square.convert("RGBA")
         ).convert("RGB")
 
-    bboxes = label_sort_big_to_small(
+    bboxes_sort_idx = label_sort_order_big_to_small(
         torch.tensor(
             [
                 [bbox.center_x, bbox.center_y, bbox.width, bbox.height]
@@ -63,13 +65,17 @@ def make_image(shape: tuple[int, int], n_squares: int) -> tuple[np.ndarray, list
         )
     )
 
-    return torch.from_numpy(np.array(empty_image_pil)) / 255.0, bboxes
+    return (
+        torch.from_numpy(np.array(empty_image_pil)) / 255.0,
+        torch.tensor(bboxes)[bboxes_sort_idx],
+        torch.tensor(colors)[bboxes_sort_idx],
+    )
 
 
-def label_sort_big_to_small(bboxes: torch.Tensor) -> torch.Tensor:
-    return bboxes  # TODO undo this
+def label_sort_order_big_to_small(bboxes: torch.Tensor) -> torch.Tensor:
+    # return bboxes  # TODO undo this
     sizes = bboxes[:, 2] * bboxes[:, 3]
-    return bboxes[torch.argsort(sizes, descending=True)]
+    return torch.argsort(sizes, descending=True)
 
 
 if __name__ == "__main__":
