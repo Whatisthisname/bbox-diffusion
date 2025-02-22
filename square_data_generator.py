@@ -6,6 +6,8 @@ import torch
 
 import matplotlib.pyplot as plt
 
+from torch.utils.data import Dataset, DataLoader
+
 BBOX = namedtuple("BBOX", ["center_x", "center_y", "width", "height"])
 
 
@@ -78,7 +80,44 @@ def label_sort_order_big_to_small(bboxes: torch.Tensor) -> torch.Tensor:
     return torch.argsort(sizes, descending=True)
 
 
+class SquareDataset(Dataset):
+    def __init__(self, image_size, num_boxes, num_samples):
+        self.image_size = image_size
+        self.num_boxes = num_boxes
+        self.num_samples = num_samples
+        self.images = []
+        self.bboxes = []
+
+        # precomputing
+        for _ in range(num_samples):
+            img, bboxes, _ = make_image(self.image_size, self.num_boxes)
+            self.images.append(img.permute(2, 0, 1))
+            self.bboxes.append(bboxes)
+
+    def __len__(self):
+        return self.num_samples
+
+    def __getitem__(self, idx):
+        return self.images[idx], self.bboxes[idx]
+
+
 if __name__ == "__main__":
+    # Parameters
+    image_size = (100, 100)
+    num_boxes = 5
+    num_samples = 1000
+    batch_size = 32
+
+    # Create dataset and dataloader
+    dataset = SquareDataset(image_size, num_boxes, num_samples)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+    # Example usage
+    for batch_imgs, batch_bboxes in dataloader:
+        print(batch_imgs.shape)  # Should be [batch_size, 3, 100, 100]
+        print(batch_bboxes.shape)  # Should be [batch_size, num_boxes, 4]
+        break
+
     img, bboxes = make_image((100, 100), 5)
     plt.imshow(img)
     plt.show()
