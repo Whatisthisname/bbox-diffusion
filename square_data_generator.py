@@ -21,7 +21,11 @@ def make_image(shape: tuple[int, int], n_squares: int) -> tuple[np.ndarray, list
         x = np.random.randint(0, shape[0])
         y = np.random.randint(0, shape[1])
 
-        x = int(shape[0] // 2 + shape[0] // 2 * (np.random.binomial(1, 0.5, 1) * 2 - 1))
+        x = int(
+            shape[0] // 2
+            + shape[0] // 2 * (np.random.binomial(1, 0.5, 1) * 2 - 1) * 0.5
+        )
+        y = 50
 
         size = np.random.randint(10, 20)
         angle = np.random.randint(0, 90)
