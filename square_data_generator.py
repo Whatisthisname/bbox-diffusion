@@ -12,7 +12,7 @@ BBOX = namedtuple("BBOX", ["center_x", "center_y", "width", "height"])
 
 
 def make_image(shape: tuple[int, int], n_squares: int) -> tuple[np.ndarray, list[BBOX]]:
-    empty_image = torch.rand(shape) * 0.5
+    empty_image = torch.rand(shape) * 0.5 * 0  # TODO remove
     empty_image_pil = Image.fromarray((empty_image.numpy() * 255).astype(np.uint8))
 
     bboxes = []
@@ -20,11 +20,14 @@ def make_image(shape: tuple[int, int], n_squares: int) -> tuple[np.ndarray, list
     for _ in range(n_squares):
         x = np.random.randint(0, shape[0])
         y = np.random.randint(0, shape[1])
+
+        x = int(shape[0] // 2 + shape[0] // 2 * (np.random.binomial(1, 0.5, 1) * 2 - 1))
+
         size = np.random.randint(10, 20)
         angle = np.random.randint(0, 90)
 
         # Create a square with random color
-        color = tuple(np.random.randint(0, 256, size=3) * 0 + 255)
+        color = tuple(np.random.randint(0, 256, size=3) * 0 + 255)  # TODO remove
         square = Image.new("RGBA", (size, size), color + (255,))
 
         # Create an alpha channel for the square

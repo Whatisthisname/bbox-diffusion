@@ -35,4 +35,4 @@ class PointPredictor(nn.Module):
         x = x.view(
             -1, self.n_output_boxes, 2
         )  # reshape to (batch_size, n_output_boxes, 2)
-        return x
+        return x * 100

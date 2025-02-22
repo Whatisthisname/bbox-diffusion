@@ -34,7 +34,7 @@ def draw_points_on_image(image, points):
     # Draw each point on the image
     for point in points_np:
         x, y = point[0], point[1]
-        ax.plot(x, y, "go", markersize=5)
+        ax.plot(x, y, "ro", markersize=10)
 
     # convert image to numpy array
     fig.canvas.draw()
