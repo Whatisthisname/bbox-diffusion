@@ -27,18 +27,18 @@ def draw_points_on_image(image, points):
     points_np = points.cpu().numpy()
 
     # Plot the image
-    plt.imshow(image)
-    plt.axis("off")
+    fig, ax = plt.subplots()
+    ax.imshow(image)
+    ax.axis("off")
 
     # Draw each point on the image
     for point in points_np:
         x, y = point[0], point[1]
-        plt.plot(x, y, "go", markersize=5)
+        ax.plot(x, y, "go", markersize=5)
 
     # convert image to numpy array
-    plt.axis("off")
+    fig.canvas.draw()
+    # close the plot
+    plt.close(fig)
 
-    as_numpy = plt.gcf()
-    as_numpy.canvas.draw()
-
-    return np.array(as_numpy.canvas.renderer.buffer_rgba())
+    return np.array(fig.canvas.renderer.buffer_rgba())

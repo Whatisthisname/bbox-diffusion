@@ -9,7 +9,9 @@ class PointPredictor(nn.Module):
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1)
         self.conv3 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
-        self.fc1 = nn.Linear(9216, 128)
+        self.conv4 = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1)
+        self.conv5 = nn.Conv2d(128, 64, kernel_size=3, stride=1, padding=1)
+        self.fc1 = nn.Linear(576, 128)
         self.fc2 = nn.Linear(
             128, n_output_boxes * 2
         )  # n_output_boxes bounding boxes * 2 coordinates each
@@ -21,6 +23,10 @@ class PointPredictor(nn.Module):
         x = torch.relu(self.conv2(x))
         x = torch.max_pool2d(x, 2)
         x = torch.relu(self.conv3(x))
+        x = torch.max_pool2d(x, 2)
+        x = torch.relu(self.conv4(x))
+        x = torch.max_pool2d(x, 2)
+        x = torch.relu(self.conv5(x))
         x = torch.max_pool2d(x, 2)
         x = x.view(x.size(0), -1)
         x = torch.relu(self.fc1(x))

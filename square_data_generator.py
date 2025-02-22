@@ -69,8 +69,8 @@ def make_image(shape: tuple[int, int], n_squares: int) -> tuple[np.ndarray, list
 
     return (
         torch.from_numpy(np.array(empty_image_pil)) / 255.0,
-        torch.tensor(bboxes)[bboxes_sort_idx],
-        torch.tensor(colors)[bboxes_sort_idx],
+        torch.tensor(bboxes)[bboxes_sort_idx].float(),
+        [tuple(x.tolist()) for x in torch.tensor(colors)[bboxes_sort_idx]],
     )
 
 
