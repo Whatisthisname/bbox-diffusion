@@ -24,7 +24,7 @@ def make_image(shape: tuple[int, int], n_squares: int) -> tuple[np.ndarray, list
         angle = np.random.randint(0, 90)
 
         # Create a square with random color
-        color = tuple(np.random.randint(0, 256, size=3))
+        color = tuple(np.random.randint(0, 256, size=3) * 0 + 255)
         square = Image.new("RGBA", (size, size), color + (255,))
 
         # Create an alpha channel for the square
@@ -56,6 +56,9 @@ def make_image(shape: tuple[int, int], n_squares: int) -> tuple[np.ndarray, list
         empty_image_pil = Image.alpha_composite(
             empty_image_pil.convert("RGBA"), padded_square.convert("RGBA")
         ).convert("RGB")
+
+        # make grayscale
+        # empty_image_pil = empty_image_pil.convert("L")
 
     bboxes_sort_idx = label_sort_order_big_to_small(
         torch.tensor(
