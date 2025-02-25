@@ -11,13 +11,14 @@ class PointPredictor(nn.Module):
         self.conv3 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
         self.conv4 = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1)
         self.conv5 = nn.Conv2d(128, 64, kernel_size=3, stride=1, padding=1)
-        self.fc1 = nn.Linear(576, 128)
-        self.fc2 = nn.Linear(
-            128, n_output_boxes * 2
-        )  # n_output_boxes bounding boxes * 2 coordinates each
+        self.fc1 = nn.Linear(576 + 2 * n_output_boxes, 128)
+        self.fc2 = nn.Linear(128, 128)
+        self.fc3 = nn.Linear(128, 2)  # n_output_boxes bounding boxes
         self.elu = nn.ELU()
 
     def forward(self, x):
+        batch_size = x.size(0)
+
         x = torch.relu(self.conv1(x))
         x = torch.max_pool2d(x, 2)
         x = torch.relu(self.conv2(x))
@@ -28,11 +29,15 @@ class PointPredictor(nn.Module):
         x = torch.max_pool2d(x, 2)
         x = torch.relu(self.conv5(x))
         x = torch.max_pool2d(x, 2)
-        x = x.view(x.size(0), -1)
-        x = torch.relu(self.fc1(x))
-        x = self.fc2(x)
-        x = self.elu(x) + 1  # All values should be positive at the end.
-        x = x.view(
-            -1, self.n_output_boxes, 2
-        )  # reshape to (batch_size, n_output_boxes, 2)
-        return x * 100
+        img_encoding = x.view(x.size(0), -1)
+
+        preds = -torch.ones(batch_size, self.n_output_boxes, 2)
+
+        for i in range(self.n_output_boxes):
+            x = torch.concat((img_encoding, preds.flatten(1)), 1)
+            x = torch.relu(self.fc1(x))
+            x = torch.relu(self.fc2(x))
+            x = self.elu(1 + self.fc3(x))  # All values should be positive at the end.
+            preds[:, i] = x
+
+        return preds * 100
