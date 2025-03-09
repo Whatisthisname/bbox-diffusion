@@ -3,7 +3,7 @@ import torch
 import matplotlib.pyplot as plt
 
 
-def draw_points_on_image(image, points):
+def draw_points_on_image(image, points, colors: list = None):
     """
     Draws 2D points on the given image.
 
@@ -23,6 +23,9 @@ def draw_points_on_image(image, points):
     if points.size(1) != 2:
         raise ValueError("Points tensor must have size (n, 2)")
 
+    if colors is None:
+        colors = ["red"] * len(points)
+
     # Convert the tensor to a numpy array
     points_np = points.cpu().numpy()
 
@@ -32,9 +35,9 @@ def draw_points_on_image(image, points):
     ax.axis("off")
 
     # Draw each point on the image
-    for point in points_np:
+    for point, color in zip(points_np, colors):
         x, y = point[0], point[1]
-        ax.plot(x, y, "ro", markersize=10)
+        ax.scatter(x, y, color=color)
 
     # convert image to numpy array
     fig.canvas.draw()
