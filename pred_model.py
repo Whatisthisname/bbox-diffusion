@@ -16,6 +16,9 @@ class SerialPointPredictor(nn.Module):
         self.fc3 = nn.Linear(128, 2)  # n_output_boxes bounding boxes
         self.elu = nn.ELU()
 
+    def __repr__(self):
+        return f"SerialPointPredictor_{self.n_outputs}"
+
     def forward(self, x):
         batch_size = x.size(0)
 
@@ -57,7 +60,11 @@ class ParallelPointPredictor(nn.Module):
         self.fc3 = nn.Linear(128, 2 * n_outputs)  # n_outputs bounding boxes
         self.elu = nn.ELU()
 
+    def __repr__(self):
+        return f"ParallelPointPredictor_{self.n_outputs}"
+
     def forward(self, x):
+        batch_size = x.size(0)
         x = torch.relu(self.conv1(x))
         x = torch.max_pool2d(x, 2)
         x = torch.relu(self.conv2(x))
@@ -72,4 +79,5 @@ class ParallelPointPredictor(nn.Module):
         x = torch.relu(self.fc1(img_encoding))
         x = torch.relu(self.fc2(x))
         x = 1 + self.elu(self.fc3(x))  # All values should be positive at the end.
-        return x * 100
+        # shape is batch_size, 2 * n_outputs
+        return x.reshape(batch_size, self.n_outputs, 2) * 100

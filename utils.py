@@ -21,7 +21,7 @@ def draw_points_on_image(image, points, colors: list = None):
         raise TypeError("Points must be a torch tensor")
 
     if points.size(1) != 2:
-        raise ValueError("Points tensor must have size (n, 2)")
+        raise ValueError(f"Points tensor must have size (n, 2), {points.shape} given")
 
     if colors is None:
         colors = ["red"] * len(points)
